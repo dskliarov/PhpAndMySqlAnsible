@@ -1,0 +1,25 @@
+---
+- name: Install Mysql, Nginx and PHP
+  hosts: all
+  remote_user: centos
+  become: yes
+  become_user: root
+
+  # remote_user: user
+  # sudo: yes
+  vars:
+    heat_endpoint: "{{ HEAT_ENDPOINT|default('foo') }}"
+    heat_token: "{{ HEAT_TOKEN|default('foo') }}"
+
+#  tasks:
+#    - debug: msg="{{ heat_endpoint }}"
+#    - debug: msg="{{ heat_token }}"
+
+    #- command: echo "{{ heat_endpoint }}"
+    #- command: echo "{{ heat_token }}"
+
+  roles:
+    - mysql
+    - nginx
+    - php
+    - heat

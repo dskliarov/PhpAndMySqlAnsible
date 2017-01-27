@@ -1,0 +1,11 @@
+- src: git@git:ansible-roles/php-geerling.git
+  scm: git
+  name: php
+
+- src: git@git:ansible-roles/nginx.git
+  scm: git
+  name: nginx
+
+  - src: git@git:ansible-roles/mysql.git
+  scm: git
+  name: mysql
