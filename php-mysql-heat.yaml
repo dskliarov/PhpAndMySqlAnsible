@@ -1,8 +1,9 @@
-t_template_version: 2013-05-23
+heat_template_version: 2013-05-23
 description: CentOS PHP and MySql server deployed using Ansible Tower
 parameters:
   server_name:
     type: string
+    default: phpmysql1
     description: Name of server
   image:
     type: string
@@ -18,7 +19,7 @@ parameters:
     default: m1.medium
   private_net_id:
     type: string
-    default: 9950f952-f651-4ffa-a103-d7ef9d48cbf
+    default: 9950f952-f651-4ffa-a103-d7ef9d48cbfd
     description: Id of the private network for the compute server
   private_subnet_id:
     type: string
@@ -54,7 +55,7 @@ resources:
         str_replace:
           template: |
             #!/bin/bash -v
-            curl -f -k -H 'Content-Type: application/json' -XPOST -d '{"host_config_key": "8217c0a711b3af173be033aab12534f0", "extra_vars": {"HEAT_ENDPOINT": "wait_endpoint","HEAT_TOKEN": "wait_token"}}' https://tower_ip:443/api/v1/job_templates/7/callback/ 
+            curl -f -k -H 'Content-Type: application/json' -XPOST -d '{"host_config_key": "8217c0a711b3af173be033aab12534f0", "extra_vars": {"HEAT_ENDPOINT": "wait_endpoint","HEAT_TOKEN": "wait_token"}}' https://tower_ip:443/api/#/job_templates/7/callback/ 
           params:
             tower_ip: { get_param: tower_private_ip }
             wc_notify: { get_attr: ['wait_handle', 'curl_cli'] }

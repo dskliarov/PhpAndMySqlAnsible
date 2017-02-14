@@ -1,0 +1,13 @@
+---
+- src: https://github.com/geerlingguy/ansible-role-git.git
+  scm: git
+- src: https://github.com/geerlingguy/ansible-role-repo-epel.git
+  scm: git
+- src: git@git:ansible-roles/remi.git
+  scm: git
+- src: git@git:ansible-roles/php-geerling.git
+  scm: git
+- src: git@git:ansible-roles/nginx.git
+  scm: git
+- src: git@git:ansible-roles/mysql.git
+  scm: git

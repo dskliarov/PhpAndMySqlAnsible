@@ -1,0 +1,70 @@
+---
+php_enablerepo: "remi-php70,epel"
+php_enable_webserver: true
+php_enable_php_fpm: true
+php_webserver_daemon: "nginx"
+php_packages_state: "latest"
+php_date_timezone: "America/Detroit"
+
+php_packages:
+  - php
+  - php-cli
+  - php-common
+  - php-devel
+  - php-fpm
+  - php-gd
+  - php-ldap
+  - php-mbstring
+  - php-pdo
+  - php-mysql
+  - php-pear
+  - php-xml
+  - php-xmlrpc
+  - php-json
+  - php-pgsql
+  - php-intl
+  - php-bcmath
+  - php-memcache
+
+php_enable_php_fpm: true
+php_fpm_listen: "/var/run/php-fpm/www.sock"
+php_fpm_listen_allowed_clients: "127.0.0.1"
+php_fpm_pm_max_children: 32
+php_fpm_pm_start_servers: 10
+php_fpm_pm_min_spare_servers: 10
+php_fpm_pm_max_spare_servers: 10
+php_fpm_pool_user: "vagrant"
+php_fpm_pool_group: "nginx"
+php_fpm_pm_max_requests: 500
+php_fpm_request_terminate_timeout: "5m"
+php_fpm_listen_owner: "vagrant"
+php_fpm_listen_group: "nginx"
+php_fpm_listen_mode: 0660
+php_fpm_slowlog: "/var/log/php-fpm/test.com-slow.log"
+php_fpm_error_log: "/var/log/php-fpm/test.com-error.log"
+php_fpm_max_filesize: "64M"
+php_fpm_post_max: "64M"
+php_fpm_rlimit_files: "40960"
+php_fpm_pool_name: "test.com"
+
+nginx_remove_default_vhost: true
+nginx_vhosts_filename: "test.com_vhost.conf"
+
+nginx_vhosts:
+  - listen: "80"
+    server_name: default_server _
+    root: "/var/www/html/test_project/public"
+    index: "index.php"
+    extra_parameters: |
+     location / {
+        index index.php;
+        try_files /$uri /$uri/ /index.php?url=$uri;
+     }
+
+     location ~ \.(php)$ {
+        fastcgi_param                 PATH_APP              /var/www/html/test_project;
+        fastcgi_index  index.php;
+        fastcgi_pass                  unix:/var/run/php-fpm/www.sock;
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+     }

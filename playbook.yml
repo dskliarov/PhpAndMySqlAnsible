@@ -5,21 +5,105 @@
   become: yes
   become_user: root
 
-  # remote_user: user
-  # sudo: yes
+  pre_tasks:
+  - name: Create /var/www
+    file:
+        state: directory 
+        path: /var/www
   vars:
-    heat_endpoint: "{{ HEAT_ENDPOINT|default('foo') }}"
-    heat_token: "{{ HEAT_TOKEN|default('foo') }}"
+   heat_endpoint: "{{ HEAT_ENDPOINT|default('foo') }}"
+   heat_token: "{{ HEAT_TOKEN|default('foo') }}"
 
-#  tasks:
-#    - debug: msg="{{ heat_endpoint }}"
-#    - debug: msg="{{ heat_token }}"
-
-    #- command: echo "{{ heat_endpoint }}"
-    #- command: echo "{{ heat_token }}"
 
   roles:
-    - mysql
-    - nginx
-    - php
-    - heat
+  - ansible-role-repo-epel
+  - remi
+  - mysql
+  - nginx
+  - php-geerling
+  - ansible-role-git
+## - heat
+
+  tasks:
+  - git:
+      accept_hostkey: true
+      repo: https://github.com/panique/mini.git
+      dest: /var/www/html/test_project
+
+  - name: Delete db mini
+    mysql_db:
+     login_password: root
+     name: mini
+     state: absent
+
+  - name: Create db mini
+    mysql_db:
+     login_password: root
+     name: mini
+     state: present
+
+  - name: import database scheme
+    mysql_db:
+     login_password: root
+     name: mini
+     state: import
+     target: /var/www/html/test_project/_install/02-create-table-song.sql
+
+  - name: import sample data
+    mysql_db:
+     login_password: root
+     name: mini
+     state: import
+     target: /var/www/html/test_project/_install/03-insert-demo-data-into-table-song.sql
+
+  - name: Update SE linux to allow httpd connect db
+    shell: setsebool -P httpd_can_network_connect_db=1
+
+  - name: Configure Application config
+    lineinfile:
+        dest: /var/www/html/test_project/application/config/config.php
+        regexp: '^define\(.DB\_PASS., .+\);$'
+        line: define('DB_PASS', 'root');
+
+  - name: Configure php-fpm pool (if enabled).
+    lineinfile:
+      dest: "{{ php_fpm_pool_conf_path }}"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      state: present
+    with_items:
+      - regexp: "^user.?=.+$"
+        line: "user = {{ php_fpm_pool_user }}"
+      - regexp: "^group.?=.+$"
+        line: "group = {{ php_fpm_pool_group }}"
+      - regexp: "^listen.?=.+$"
+        line: "listen = {{ php_fpm_listen }}"
+      - regexp: '^listen\.allowed_clients.?=.+$'
+        line: "listen.allowed_clients = {{ php_fpm_listen_allowed_clients }}"
+      - regexp: '^pm\.max_children.?=.+$'
+        line: "pm.max_children = {{ php_fpm_pm_max_children }}"
+      - regexp: '^pm\.start_servers.?=.+$'
+        line: "pm.start_servers = {{ php_fpm_pm_start_servers }}"
+      - regexp: '^pm\.min_spare_servers.?=.+$'
+        line: "pm.min_spare_servers = {{ php_fpm_pm_min_spare_servers }}"
+      - regexp: '^pm\.max_spare_servers.?=.+$'
+        line: "pm.max_spare_servers = {{ php_fpm_pm_max_spare_servers }}"
+      - regexp: '^pm\.max_requests.?=.+$'
+        line: "pm.max_requests = {{ php_fpm_pm_max_requests }}"
+      - regexp: '^listen\.owner.?=.+$'
+        line: "listen.owner = {{ php_fpm_listen_owner }}"
+      - regexp: '^listen\.group.?=.+$'
+        line: "listen.group = {{ php_fpm_listen_group }}"
+      - regexp: '^slowlog.?=.+$'
+        line: "slowlog = {{ php_fpm_slowlog }}"
+      - regexp: '^php_admin_value\[error_log\].?=.+$'
+        line: "php_admin_value[error_log] = {{ php_fpm_error_log }}"
+      - regexp: '^php_admin_value\[upload_max_filesize\].?=.+$'
+        line: "php_admin_value[upload_max_filesize] = {{ php_fpm_max_filesize }}"
+      - regexp: '^php_admin_value\[post_max_size\].?=.+$'
+        line: "php_admin_value[post_max_size] = {{ php_fpm_post_max }}"
+      - regexp: '^rlimit_files.?=.+$'
+        line: "rlimit_files = {{ php_fpm_rlimit_files }}"
+    when: php_enable_php_fpm
+    notify: restart php-fpm
+

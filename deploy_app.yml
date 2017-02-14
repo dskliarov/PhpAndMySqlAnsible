@@ -1,0 +1,4 @@
+---
+- git: 
+   repo: https://github.com/panique/mini.git
+   dest: /var/www/html/test_project
