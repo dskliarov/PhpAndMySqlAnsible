@@ -1,1 +1,9 @@
 .vagrant
+.vagrant/*
+roles/ansible-role-git/
+roles/ansible-role-mysql/
+roles/ansible-role-nginx/
+roles/ansible-role-php/
+roles/ansible-role-repo-epel/
+roles/ansible-role-repo-remi/
+

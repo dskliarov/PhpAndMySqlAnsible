@@ -17,10 +17,10 @@
 
   roles:
   - ansible-role-repo-epel
-  - remi
-  - mysql
-  - nginx
-  - php-geerling
+  - ansible-role-repo-remi
+  - ansible-role-mysql
+  - ansible-role-nginx
+  - ansible-role-php
   - ansible-role-git
 ## - heat
 

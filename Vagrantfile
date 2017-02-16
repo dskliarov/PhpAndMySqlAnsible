@@ -17,8 +17,8 @@ Vagrant.configure(2) do |config|
     host.vm.hostname = "test1qlphpmysql"
     # NOTE: You can override the boxtype here
     # host.vm.network :private_network, ip: "192.168.2.21"
-    host.vm.network "forwarded_port", guest: 80, host: 6080
-    host.vm.network "forwarded_port", guest: 443, host: 6443
+    host.vm.network "forwarded_port", guest: 80, host: 5080
+    host.vm.network "forwarded_port", guest: 443, host: 5443
     host.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--name", host.vm.hostname]
     end
